@@ -32,6 +32,10 @@ public class Vector2D {
         return new Vector2D(newX, newY);
     }
 
+    public Vector2D multiply(double scalar) {
+        return new Vector2D(x * scalar, y * scalar);
+    }
+
     public double magnitude() {
         double d;
         double magnitude;
@@ -44,20 +48,7 @@ public class Vector2D {
     }
 
     public double dotProduct(Vector2D vec) {
-        double aDOTb;
-        double aMag;
-        double bMag;
-        double angle;
-
-        aDOTb = (this.x * vec.getX()) + (this.y + vec.getY());
-
-        aMag = this.magnitude();
-        bMag = vec.magnitude();
-
-        angle = Math.acos((aDOTb)/(aMag * bMag));
-        angle = angle * (180/Math.PI);
-
-        return angle;
+        return (this.x * vec.getX()) + (this.y * vec.getY());
     }
 
     public Vector2D unitNormal2D(){
@@ -83,5 +74,9 @@ public class Vector2D {
         double newY = vec8.getY() * velocity;
 
         return new Vector2D(newX, newY);
+    }
+
+    public Vector2D flip() {
+        return new Vector2D(-x, -y);
     }
 }
