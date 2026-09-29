@@ -39,6 +39,8 @@ public class World implements Tickable, Renderable {
     private final ItemFactory itemFactory;
     private final CollisionSubject collisionSubject;
     private final WorldSearchSubject worldSearchSubject;
+    private int timeUntilNextRound;
+    private boolean readyForNextWave;
 
     public World(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
@@ -46,6 +48,8 @@ public class World implements Tickable, Renderable {
         this.itemFactory = new BasicItemFactory();
         this.collisionSubject = new CollisionSubject();
         this.worldSearchSubject = new WorldSearchSubject();
+        this.timeUntilNextRound = 100;
+        this.readyForNextWave = true;
     }
 
     //Runs right before the game loop starts
@@ -56,7 +60,6 @@ public class World implements Tickable, Renderable {
         double pY = (double) (gamePanel.getHeight() / 2) - ((double) TILE_SIZE / 2);
         spawnEntity("player", new Vector2D(pX, pY));
         spawnItem("sword", new Vector2D(pX + 100, pY + 100));
-        spawnZombieWave();
 
         this.collisionSubject.attach((e) -> {
             if(!(e.a instanceof Entity e1) || !(e.b instanceof Entity e2)) {
@@ -148,6 +151,25 @@ public class World implements Tickable, Renderable {
 
     @Override
     public void tick(float dt) {
+        // Round win detection
+        if(timeUntilNextRound > 0 && readyForNextWave) {
+            timeUntilNextRound--;
+        } else {
+            if(readyForNextWave) {
+                spawnZombieWave();
+                readyForNextWave = false;
+                timeUntilNextRound = 100;
+                //ON START NEXT ROUND -> DEFINE OBSERVER
+            }
+        }
+        if(entities.size() == 1 && !readyForNextWave) {
+            Entity entity = entities.getFirst();
+            if(entity instanceof PlayerEntity player) {
+                readyForNextWave = true;
+            }
+        }
+
+
         //Checks for any hitbox collision
         List<Detectable> detectables = new ArrayList<>();
         detectables.addAll(entities);

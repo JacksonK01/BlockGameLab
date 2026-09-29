@@ -16,7 +16,7 @@ public abstract class Entity implements Tickable, Renderable, Detectable, Damage
     protected World world;
     protected double x;
     protected double y;
-    protected final Color color;
+    protected Color color;
     protected final Rectangle hitbox;
     protected int health;
     protected int cooldown;
@@ -88,6 +88,11 @@ public abstract class Entity implements Tickable, Renderable, Detectable, Damage
     @Override
     public int getHealth() {
         return this.health;
+    }
+
+    //Default true for most entities
+    public boolean doesCollide() {
+        return true;
     }
 
     @Override

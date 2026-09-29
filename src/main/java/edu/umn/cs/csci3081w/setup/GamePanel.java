@@ -11,7 +11,7 @@ public class GamePanel extends JPanel implements Runnable {
 
     public GamePanel() {
         super();
-        setPreferredSize(new Dimension(800, 600));
+        setPreferredSize(new Dimension(1000, 800));
         world = new World(this);
         setFocusable(true);
     }
