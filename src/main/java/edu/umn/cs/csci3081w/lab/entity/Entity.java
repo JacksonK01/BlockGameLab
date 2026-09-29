@@ -2,22 +2,24 @@ package edu.umn.cs.csci3081w.lab.entity;
 
 
 import edu.umn.cs.csci3081w.lab.World;
+import edu.umn.cs.csci3081w.lab.intr.Damageable;
+import edu.umn.cs.csci3081w.lab.intr.Detectable;
 import edu.umn.cs.csci3081w.lab.intr.Renderable;
 import edu.umn.cs.csci3081w.lab.intr.Tickable;
 import edu.umn.cs.csci3081w.lab.math.Vector2D;
 
 import java.awt.*;
 
-public abstract class Entity implements Tickable, Renderable {
-    private static final int MAX_HEALTH = 20;
+public abstract class Entity implements Tickable, Renderable, Detectable, Damageable {
+    public static final int MAX_HEALTH = 20;
 
     protected World world;
     protected double x;
     protected double y;
-    private final Color color;
-    private final Rectangle hitbox;
-    private int health;
-    private int cooldown;
+    protected final Color color;
+    protected final Rectangle hitbox;
+    protected int health;
+    protected int cooldown;
 
     public Entity(World world, Color color, double width, double height) {
         this.color = color;
@@ -29,23 +31,27 @@ public abstract class Entity implements Tickable, Renderable {
         this.cooldown = 0;
     }
 
+    @Override
     public void setPos(Vector2D pos) {
         this.x = pos.getX();
         this.y = pos.getY();
         this.hitbox.setLocation((int) this.x, (int) this.y);
     }
 
+    @Override
     public Vector2D getPos() {
         return new Vector2D(x, y);
     }
 
-    public Rectangle getHitbox() {
+    @Override
+    public Rectangle getBoundingBox() {
         return hitbox;
     }
 
-    public void damage(int damage) {
+    @Override
+    public void damage(int damage, Entity source) {
         if(cooldown <= 0) {
-            this.cooldown = 10;
+            this.cooldown = 15;
             this.health -= damage;
         }
     }
@@ -79,7 +85,13 @@ public abstract class Entity implements Tickable, Renderable {
         g2.fillRect((int) this.x, y, barWidth, height);
     }
 
-    private void onDeath() {
+    @Override
+    public int getHealth() {
+        return this.health;
+    }
+
+    @Override
+    public void onDeath() {
         world.getEntities().remove(this);
     }
 }

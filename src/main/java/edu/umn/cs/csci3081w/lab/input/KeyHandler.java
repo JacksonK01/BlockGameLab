@@ -6,8 +6,10 @@ import java.awt.event.KeyListener;
 public class KeyHandler implements KeyListener {
     //Movement
     private boolean upPressed, rightPressed, downPressed, leftPressed;
-    //Attack
+
     private boolean interactPressed;
+    private boolean wasInteractJustPressed = false;
+
     @Override
     public void keyTyped(KeyEvent e) {}
 
@@ -75,5 +77,11 @@ public class KeyHandler implements KeyListener {
 
     public boolean isInteractPressed() {
         return interactPressed;
+    }
+
+    public boolean wasInteractJustPressed() {
+        boolean justPressed = interactPressed && !wasInteractJustPressed;
+        wasInteractJustPressed = interactPressed;
+        return justPressed;
     }
 }

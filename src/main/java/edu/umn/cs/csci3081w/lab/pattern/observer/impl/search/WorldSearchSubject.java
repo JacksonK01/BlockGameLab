@@ -1,8 +1,6 @@
 package edu.umn.cs.csci3081w.lab.pattern.observer.impl.search;
 
-import edu.umn.cs.csci3081w.lab.World;
 import edu.umn.cs.csci3081w.lab.entity.Entity;
-import edu.umn.cs.csci3081w.lab.pattern.observer.impl.collision.EntityCollisionEvent;
 import edu.umn.cs.csci3081w.lab.pattern.observer.intr.Observer;
 import edu.umn.cs.csci3081w.lab.pattern.observer.intr.Subject;
 

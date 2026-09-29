@@ -1,4 +1,4 @@
-package edu.umn.cs.csci3081w.lab.pattern.factory;
+package edu.umn.cs.csci3081w.lab.pattern.factory.entity;
 
 import edu.umn.cs.csci3081w.lab.World;
 import edu.umn.cs.csci3081w.lab.entity.Entity;

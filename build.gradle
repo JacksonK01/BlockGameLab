@@ -9,7 +9,10 @@ repositories {
     mavenCentral()
 }
 
+//Source: https://stackoverflow.com/questions/19030954/cant-find-nullable-inside-javax-annotation
 dependencies {
+    // Source: https://mvnrepository.com/artifact/com.github.spotbugs/spotbugs-annotations
+    implementation("com.github.spotbugs:spotbugs-annotations:4.10.4")
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
