@@ -1,7 +1,7 @@
 package edu.umn.cs.csci3081w.lab.pattern.decorator;
 
 import edu.umn.cs.csci3081w.lab.item.Item;
-import edu.umn.cs.csci3081w.lab.math.Vector2D;
+import edu.umn.cs.csci3081w.lab.util.Vector2D;
 
 import java.awt.*;
 

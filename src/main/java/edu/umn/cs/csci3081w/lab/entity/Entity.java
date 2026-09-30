@@ -6,12 +6,13 @@ import edu.umn.cs.csci3081w.lab.intr.Damageable;
 import edu.umn.cs.csci3081w.lab.intr.Detectable;
 import edu.umn.cs.csci3081w.lab.intr.Renderable;
 import edu.umn.cs.csci3081w.lab.intr.Tickable;
-import edu.umn.cs.csci3081w.lab.math.Vector2D;
+import edu.umn.cs.csci3081w.lab.util.Vector2D;
 
 import java.awt.*;
 
 public abstract class Entity implements Tickable, Renderable, Detectable, Damageable {
     public static final int MAX_HEALTH = 20;
+    public static final int STARTING_ENTITY_COOLDOWN = 15;
 
     protected World world;
     protected double x;
@@ -51,7 +52,7 @@ public abstract class Entity implements Tickable, Renderable, Detectable, Damage
     @Override
     public void damage(int damage, Entity source) {
         if(cooldown <= 0) {
-            this.cooldown = 15;
+            this.cooldown = STARTING_ENTITY_COOLDOWN;
             this.health -= damage;
         }
     }

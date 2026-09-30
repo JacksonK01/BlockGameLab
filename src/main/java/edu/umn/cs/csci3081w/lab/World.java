@@ -1,39 +1,31 @@
 package edu.umn.cs.csci3081w.lab;
 
+import edu.umn.cs.csci3081w.lab.collision.CollisionManager;
 import edu.umn.cs.csci3081w.lab.entity.Entity;
 import edu.umn.cs.csci3081w.lab.entity.PlayerEntity;
-import edu.umn.cs.csci3081w.lab.entity.ZombieEntity;
 import edu.umn.cs.csci3081w.lab.input.KeyHandler;
-import edu.umn.cs.csci3081w.lab.intr.Detectable;
-import edu.umn.cs.csci3081w.lab.intr.ItemHolder;
-import edu.umn.cs.csci3081w.lab.intr.Renderable;
-import edu.umn.cs.csci3081w.lab.intr.Tickable;
-import edu.umn.cs.csci3081w.lab.item.DamageBoosterItem;
+import edu.umn.cs.csci3081w.lab.intr.*;
 import edu.umn.cs.csci3081w.lab.item.Item;
-import edu.umn.cs.csci3081w.lab.item.SwordItem;
-import edu.umn.cs.csci3081w.lab.math.Vector2D;
-import edu.umn.cs.csci3081w.lab.pattern.decorator.ConcreteDamageBoosterDecorator;
-import edu.umn.cs.csci3081w.lab.pattern.decorator.ItemDecorator;
+import edu.umn.cs.csci3081w.lab.spawner.DamageBoosterSpawner;
+import edu.umn.cs.csci3081w.lab.util.Vector2D;
 import edu.umn.cs.csci3081w.lab.pattern.factory.entity.BasicEntityFactory;
 import edu.umn.cs.csci3081w.lab.pattern.factory.entity.EntityFactory;
 import edu.umn.cs.csci3081w.lab.pattern.factory.item.BasicItemFactory;
 import edu.umn.cs.csci3081w.lab.pattern.factory.item.ItemFactory;
-import edu.umn.cs.csci3081w.lab.pattern.observer.impl.collision.CollisionSubject;
 import edu.umn.cs.csci3081w.lab.pattern.observer.impl.search.SearchEvent;
 import edu.umn.cs.csci3081w.lab.pattern.observer.impl.search.WorldSearchSubject;
 import edu.umn.cs.csci3081w.lab.pattern.observer.intr.Observer;
 import edu.umn.cs.csci3081w.lab.ui.UIManager;
+import edu.umn.cs.csci3081w.lab.wave.WaveManager;
 import edu.umn.cs.csci3081w.setup.GamePanel;
 
-import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-public class World implements Tickable, Renderable {
+public class World implements Tickable, Renderable, Spawner {
     public static int TILE_SIZE = 64;
-    private static int MAX_BOOSTER = 5;
+
     private static final Color PRIMARY_GREEN = new Color(79, 121, 66);
     private static final Color SECONDARY_GREEN = new Color(53, 94, 59);
 
@@ -42,28 +34,22 @@ public class World implements Tickable, Renderable {
     private final GamePanel gamePanel;
     private final KeyHandler keyHandler = new KeyHandler();
     private final UIManager uiManager;
+    private final CollisionManager collisionManager;
+    private final WaveManager waveManager;
+    private final DamageBoosterSpawner damageBoosterSpawner;
     private final EntityFactory entityFactory;
     private final ItemFactory itemFactory;
-    private final CollisionSubject collisionSubject;
     private final WorldSearchSubject worldSearchSubject;
-    private int timeUntilNextRound;
-    private boolean readyForNextWave;
-    private int boosterAmount;
-    private int boostersCollected;
-    private int wave;
 
     public World(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
         this.entityFactory = new BasicEntityFactory();
         this.itemFactory = new BasicItemFactory();
-        this.collisionSubject = new CollisionSubject();
         this.worldSearchSubject = new WorldSearchSubject();
-        this.timeUntilNextRound = 100;
-        this.readyForNextWave = true;
-        this.boosterAmount = 0;
-        this.boostersCollected = 0;
-        this.wave = 0;
-        this.uiManager = new UIManager(this, gamePanel);
+        this.collisionManager = new CollisionManager(this);
+        this.waveManager = new WaveManager(this);
+        this.damageBoosterSpawner = new DamageBoosterSpawner(this, waveManager, collisionManager);
+        this.uiManager = new UIManager(this, waveManager, damageBoosterSpawner);
     }
 
     //Runs right before the game loop starts
@@ -74,75 +60,6 @@ public class World implements Tickable, Renderable {
         double pY = (double) (gamePanel.getHeight() / 2) - ((double) TILE_SIZE / 2);
         spawnEntity("player", new Vector2D(pX, pY));
         spawnItem("sword", new Vector2D(pX + 100, pY + 100));
-
-        this.collisionSubject.attach((e) -> {
-            if(!(e.a instanceof Entity e1) || !(e.b instanceof Entity e2)) {
-                return;
-            }
-
-            Vector2D distance = e1.getPos().subtract(e2.getPos());
-            if(distance.getX() == 0 && distance.getY() == 0) {
-                distance = new Vector2D(0.25, 0.25);
-            }
-            distance = distance.unitNormal2D().multiply(2.5);
-
-            e1.setPos(e1.getPos().add(distance));
-            e2.setPos(e2.getPos().add(distance.flip()));
-        });
-
-        this.collisionSubject.attach((e) -> {
-            PlayerEntity player = findSource(e.a, e.b, PlayerEntity.class);
-            ZombieEntity zombie = findSource(e.a, e.b, ZombieEntity.class);
-
-            if(player == null || zombie == null) {
-                return;
-            }
-
-            int cooldown = player.getCooldown();
-            player.damage(1, zombie);
-            Item held = player.itemBeingHeld();
-            if(held == null) {
-                return;
-            }
-
-            if(cooldown == 0 && held instanceof ItemDecorator itemDecorator) {
-                // Removes one booster level
-                player.placeItemInHand(itemDecorator.getItem());
-                // Implicitly booster amount will be > 0
-                boosterAmount--;
-                boostersCollected--;
-            }
-        });
-
-        this.collisionSubject.attach((e) -> {
-            ItemHolder holder = findSource(e.a, e.b, ItemHolder.class);
-            SwordItem sword = findSource(e.a, e.b, SwordItem.class);
-
-            if(holder == null || sword == null) {
-                return;
-            }
-
-            holder.placeItemInHand(sword);
-            items.remove(sword);
-        });
-
-        this.collisionSubject.attach((e) -> {
-            PlayerEntity player = findSource(e.a, e.b, PlayerEntity.class);
-            DamageBoosterItem booster = findSource(e.a, e.b, DamageBoosterItem.class);
-
-            if(player == null || booster == null) {
-                return;
-            }
-
-            Item hand = player.itemBeingHeld();
-            if(hand == null) {
-                return;
-            }
-
-            player.placeItemInHand(new ConcreteDamageBoosterDecorator(hand));
-            items.remove(booster);
-            boostersCollected++;
-        });
     }
 
     public void searchAreaEntities(Rectangle areaToSearch, Entity searcher) {
@@ -154,6 +71,7 @@ public class World implements Tickable, Renderable {
         }
     }
 
+    @Override
     public Entity spawnEntity(String type, Vector2D pos) {
         Entity newEntity = entityFactory.create(type, this);
         newEntity.setPos(pos);
@@ -161,6 +79,7 @@ public class World implements Tickable, Renderable {
         return newEntity;
     }
 
+    @Override
     public Item spawnItem(String item, Vector2D pos) {
         Item newItem = itemFactory.create(item);
         newItem.setPos(pos);
@@ -186,12 +105,8 @@ public class World implements Tickable, Renderable {
         return this.items;
     }
 
-    public int getWave() {
-        return wave;
-    }
-
-    public int getBoostersCollected() {
-        return boostersCollected;
+    public Rectangle getWorldSize() {
+        return new Rectangle(0, 0, gamePanel.getWidth(), gamePanel.getHeight());
     }
 
     public void attachSearchObserver(Observer<SearchEvent> o) {
@@ -213,68 +128,33 @@ public class World implements Tickable, Renderable {
 
     @Override
     public void tick(float dt) {
-        // Round win detection
-        if(timeUntilNextRound > 0 && readyForNextWave) {
-            timeUntilNextRound--;
-        } else {
-            if(readyForNextWave) {
-                spawnWave();
-                wave++;
-                readyForNextWave = false;
-                timeUntilNextRound = 100;
-                //ON START NEXT ROUND -> DEFINE OBSERVER
-            }
-        }
-        if(entities.size() == 1 && !readyForNextWave) {
-            Entity entity = entities.getFirst();
-            if(entity instanceof PlayerEntity player) {
-                readyForNextWave = true;
-            }
-        }
-
-
-        //Checks for any hitbox collision
-        List<Detectable> detectables = new ArrayList<>();
-        detectables.addAll(entities);
-        detectables.addAll(items);
-        for(int i = 0; i < detectables.size(); i++) {
-            for(int j = i + 1; j < detectables.size(); j++) {
-                Detectable a = detectables.get(i);
-                Detectable b = detectables.get(j);
-                if(a.getBoundingBox().intersects(b.getBoundingBox())) {
-                    collisionSubject.setEntities(a, b);
-                    collisionSubject.notifyObservers();
-                }
-            }
-        }
-
+        waveManager.tick(dt);
+        collisionManager.tick(dt);
         //DO NOT REPLACE WITH ENHANCE FOR LOOP
         //When entities die, they immediately remove themselves from world
         for (int i = 0; i < entities.size(); i++) {
             Entity entity = entities.get(i);
             entity.tick(dt);
-
-            Vector2D pos = entity.getPos();
-            Rectangle hitbox = entity.getBoundingBox();
-            if(pos.getX() < 0) {
-                entity.setPos(new Vector2D(0, pos.getY()));
-            }
-            double width = gamePanel.getWidth() - hitbox.getWidth();
-            if(pos.getX() > width) {
-                entity.setPos(new Vector2D(width, pos.getY()));
-            }
-            if(pos.getY() < 0) {
-                entity.setPos(new Vector2D(pos.getX(), 0));
-            }
-            double height = gamePanel.getHeight() - hitbox.getHeight();
-            if(pos.getY() > height) {
-                entity.setPos(new Vector2D(pos.getX(), height));
-            }
+            collisionManager.checkOutOfBounds(gamePanel, entity);
         }
     }
 
     @Override
     public void render(Graphics2D g2) {
+        drawBackground(g2);
+
+        for(Item item : items) {
+            item.render(g2);
+        }
+
+        for (Entity entity : entities) {
+            entity.render(g2);
+        }
+
+        uiManager.render(g2);
+    }
+
+    private void drawBackground(Graphics2D g2) {
         int rows = (gamePanel.getWidth() / TILE_SIZE) + 1;
         int cols = (gamePanel.getHeight() / TILE_SIZE) + 1;
         for(int i = 0; i < rows; i++) {
@@ -290,50 +170,6 @@ public class World implements Tickable, Renderable {
                 g2.setColor(toUse);
                 g2.fillRect(x, y, TILE_SIZE, TILE_SIZE);
             }
-        }
-
-        for(Item item : items) {
-            item.render(g2);
-        }
-
-        for (Entity entity : entities) {
-            entity.render(g2);
-        }
-
-        uiManager.render(g2);
-    }
-
-    //Source: https://stackoverflow.com/questions/36585185/instance-of-t-generic-type-in-java
-    @Nullable
-    private <T> T findSource(Detectable a, Detectable b, Class<T> type) {
-        if(type.isInstance(a)) {
-            return type.cast(a);
-        } else if(type.isInstance(b)) {
-            return type.cast(b);
-        } else {
-            return null;
-        }
-    }
-
-    private void spawnWave() {
-        int offset = 20;
-        spawnEntity("zombie", new Vector2D(offset, offset));
-        spawnEntity("zombie", new Vector2D((double) gamePanel.getWidth() / 2, offset));
-        spawnEntity("zombie", new Vector2D((double) gamePanel.getWidth() - offset, offset));
-
-        int zY = gamePanel.getHeight() - offset;
-        spawnEntity("zombie", new Vector2D(offset, zY));
-        spawnEntity("zombie", new Vector2D((double) gamePanel.getWidth() / 2, zY));
-        spawnEntity("zombie", new Vector2D((double) gamePanel.getWidth() - offset, zY));
-
-        Random random = new Random();
-        //TODO evaluate if its more fun to have a booster each level
-        if(boosterAmount < MAX_BOOSTER && boosterAmount == boostersCollected) {
-            int boostOffset = TILE_SIZE;
-            int boostX = random.nextInt(offset, gamePanel.getWidth() - boostOffset);
-            int boostY = random.nextInt(offset, gamePanel.getHeight() - boostOffset);
-            spawnItem("damageBooster", new Vector2D(boostX, boostY));
-            boosterAmount++;
         }
     }
 }

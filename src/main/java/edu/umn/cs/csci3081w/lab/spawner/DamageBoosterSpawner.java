@@ -1,0 +1,101 @@
+package edu.umn.cs.csci3081w.lab.spawner;
+
+import edu.umn.cs.csci3081w.lab.World;
+import edu.umn.cs.csci3081w.lab.collision.CollisionManager;
+import edu.umn.cs.csci3081w.lab.entity.Entity;
+import edu.umn.cs.csci3081w.lab.entity.PlayerEntity;
+import edu.umn.cs.csci3081w.lab.entity.ZombieEntity;
+import edu.umn.cs.csci3081w.lab.intr.Tickable;
+import edu.umn.cs.csci3081w.lab.item.DamageBoosterItem;
+import edu.umn.cs.csci3081w.lab.item.Item;
+import edu.umn.cs.csci3081w.lab.pattern.decorator.ConcreteDamageBoosterDecorator;
+import edu.umn.cs.csci3081w.lab.pattern.decorator.ItemDecorator;
+import edu.umn.cs.csci3081w.lab.pattern.observer.impl.booster.BoosterCollectedEvent;
+import edu.umn.cs.csci3081w.lab.pattern.observer.impl.booster.DamageBoosterCollectedSubject;
+import edu.umn.cs.csci3081w.lab.pattern.observer.intr.Observer;
+import edu.umn.cs.csci3081w.lab.util.SourceFinder;
+import edu.umn.cs.csci3081w.lab.util.Vector2D;
+import edu.umn.cs.csci3081w.lab.wave.WaveManager;
+
+import java.awt.*;
+import java.util.Random;
+
+public class DamageBoosterSpawner {
+    private final static int MAX_BOOSTER = 5;
+
+    private DamageBoosterCollectedSubject subject;
+    private int boosterAmount;
+    private int boostersCollected;
+
+    public DamageBoosterSpawner(World world, WaveManager waveManager, CollisionManager collisionManager) {
+        subject = new DamageBoosterCollectedSubject();
+        boosterAmount = 0;
+        boostersCollected = 0;
+
+        waveManager.attachOnRoundStart((e) -> {
+            Random random = new Random();
+            Rectangle worldSize = world.getWorldSize();
+            if(boostersCollected < MAX_BOOSTER && boosterAmount == boostersCollected) {
+                int boostOffset = World.TILE_SIZE;
+                int boostX = random.nextInt(boostOffset, (int) (worldSize.getWidth() - boostOffset));
+                int boostY = random.nextInt(boostOffset, (int) (worldSize.getHeight() - boostOffset));
+                world.spawnItem("damageBooster", new Vector2D(boostX, boostY));
+                boosterAmount++;
+            }
+        });
+
+        collisionManager.attachOnCollision((e) -> {
+            PlayerEntity player = SourceFinder.findSource(e.a, e.b, PlayerEntity.class);
+            ZombieEntity zombie = SourceFinder.findSource(e.a, e.b, ZombieEntity.class);
+
+            if(player == null || zombie == null) {
+                return;
+            }
+
+            Item held = player.itemBeingHeld();
+            if(held == null) {
+                return;
+            }
+
+            int cooldown = player.getCooldown();
+            if((cooldown == 0 || cooldown == Entity.STARTING_ENTITY_COOLDOWN)
+                    && held instanceof ItemDecorator itemDecorator) {
+                // Removes one booster level
+                player.placeItemInHand(itemDecorator.getItem());
+                // Implicitly collected will be > 0
+                boostersCollected--;
+                boosterAmount--;
+                subject.setCollected(boostersCollected);
+                subject.notifyObservers();
+            }
+        });
+
+        collisionManager.attachOnCollision((e) -> {
+            PlayerEntity player = SourceFinder.findSource(e.a, e.b, PlayerEntity.class);
+            DamageBoosterItem booster = SourceFinder.findSource(e.a, e.b, DamageBoosterItem.class);
+
+            if(player == null || booster == null) {
+                return;
+            }
+
+            Item hand = player.itemBeingHeld();
+            if(hand == null) {
+                return;
+            }
+
+            player.placeItemInHand(new ConcreteDamageBoosterDecorator(hand));
+            world.getItems().remove(booster);
+            boostersCollected++;
+            subject.setCollected(boostersCollected);
+            subject.notifyObservers();
+        });
+    }
+
+    public void attachOnCollected(Observer<BoosterCollectedEvent> o) {
+        this.subject.attach(o);
+    }
+
+    public void detachOnCollected(Observer<BoosterCollectedEvent> o) {
+        this.subject.detach(o);
+    }
+}

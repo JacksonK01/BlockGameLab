@@ -99,10 +99,7 @@ public class PlayerEntity extends Entity implements ItemHolder {
     @Override
     public void onDeath() {
         super.onDeath();
-        if(hand == null) {
-            return;
-        }
-        dropHeldItem();
         world.detachSearchObserver(observer);
+        dropHeldItem();
     }
 }

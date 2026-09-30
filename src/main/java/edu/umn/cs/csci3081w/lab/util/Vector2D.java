@@ -1,4 +1,4 @@
-package edu.umn.cs.csci3081w.lab.math;
+package edu.umn.cs.csci3081w.lab.util;
 
 //TODO fill out
 public class Vector2D {

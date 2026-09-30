@@ -2,7 +2,7 @@ package edu.umn.cs.csci3081w.lab.item;
 
 import edu.umn.cs.csci3081w.lab.intr.Detectable;
 import edu.umn.cs.csci3081w.lab.intr.Renderable;
-import edu.umn.cs.csci3081w.lab.math.Vector2D;
+import edu.umn.cs.csci3081w.lab.util.Vector2D;
 
 import java.awt.*;
 
