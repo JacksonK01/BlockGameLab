@@ -18,7 +18,7 @@ public class ZombieEntity extends Entity {
     private final Observer<SearchEvent> observer;
 
     public ZombieEntity(World world) {
-        super(world, new Color(15, 255, 80), World.TILE_SIZE, World.TILE_SIZE);
+        super(world, new Color(150, 255, 150), World.TILE_SIZE, World.TILE_SIZE);
         random = new Random();
 
         observer = (e) -> {

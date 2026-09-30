@@ -327,7 +327,7 @@ public class World implements Tickable, Renderable {
 
         Random random = new Random();
         //TODO evaluate if its more fun to have a booster each level
-        if(random.nextBoolean() && boosterAmount <= MAX_BOOSTER) {
+        if(boosterAmount < MAX_BOOSTER && boosterAmount == boostersCollected) {
             int boostOffset = TILE_SIZE;
             int boostX = random.nextInt(offset, gamePanel.getWidth() - boostOffset);
             int boostY = random.nextInt(offset, gamePanel.getHeight() - boostOffset);
