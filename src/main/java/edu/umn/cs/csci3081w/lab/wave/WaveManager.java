@@ -4,10 +4,9 @@ import edu.umn.cs.csci3081w.lab.World;
 import edu.umn.cs.csci3081w.lab.entity.Entity;
 import edu.umn.cs.csci3081w.lab.entity.PlayerEntity;
 import edu.umn.cs.csci3081w.lab.intr.Tickable;
-import edu.umn.cs.csci3081w.lab.intr.WaveSpawnerStrategy;
+import edu.umn.cs.csci3081w.lab.pattern.strategy.WaveSpawnerStrategy;
 import edu.umn.cs.csci3081w.lab.pattern.observer.impl.wave.StartOfWaveSubject;
 import edu.umn.cs.csci3081w.lab.pattern.observer.impl.wave.WaveEvent;
-import edu.umn.cs.csci3081w.lab.pattern.observer.intr.Observer;
 import edu.umn.cs.csci3081w.lab.pattern.observer.intr.Subject;
 
 import java.util.List;
@@ -35,10 +34,10 @@ public class WaveManager implements Tickable {
             timeUntilNextRound--;
         } else {
             if(readyForNextWave) {
-                waveSpawnerStrategy.spawnWave(world, wave);
                 wave++;
                 readyForNextWave = false;
                 timeUntilNextRound = 100;
+                waveSpawnerStrategy.spawnWave(world, world.getWorldSize(), wave);
 
                 startOfWaveSubject.setWave(wave);
                 startOfWaveSubject.notifyObservers();
@@ -48,7 +47,7 @@ public class WaveManager implements Tickable {
         List<Entity> entities = world.getEntities();
         if(entities.size() == 1 && !readyForNextWave) {
             Entity entity = entities.getFirst();
-            if(entity instanceof PlayerEntity player) {
+            if(entity instanceof PlayerEntity) {
                 readyForNextWave = true;
             }
         }
