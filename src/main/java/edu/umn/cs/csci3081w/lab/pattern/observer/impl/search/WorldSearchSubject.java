@@ -10,9 +10,11 @@ import java.util.List;
 public class WorldSearchSubject implements Subject<SearchEvent> {
     private final List<Observer<SearchEvent>> observers = new ArrayList<>();
     private Entity found;
+    private Entity searcher;
 
-    public void setFound(Entity found) {
+    public void setFoundAndSearcher(Entity found, Entity searcher) {
         this.found = found;
+        this.searcher = searcher;
     }
 
     @Override
@@ -31,7 +33,7 @@ public class WorldSearchSubject implements Subject<SearchEvent> {
             throw new IllegalArgumentException("Missing found entity");
         }
 
-        SearchEvent e = new SearchEvent(found);
+        SearchEvent e = new SearchEvent(found, searcher);
         for(Observer<SearchEvent> o : observers) {
             o.update(e);
         }

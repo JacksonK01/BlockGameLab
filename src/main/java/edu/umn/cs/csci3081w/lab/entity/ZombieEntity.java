@@ -22,6 +22,9 @@ public class ZombieEntity extends Entity {
         random = new Random();
 
         observer = (e) -> {
+            if(e.searcher != this) {
+                return;
+            }
             Entity found = e.found;
             if(found instanceof PlayerEntity) {
                 toChase = found;
@@ -31,8 +34,8 @@ public class ZombieEntity extends Entity {
 
         world.attachSearchObserver(observer);
 
-        directionX = random.nextInt(-1, 2);
-        directionY = random.nextInt(-1, 2);
+        generateRandomDirection();
+        attention = random.nextInt(1, 26);
     }
 
     @Override
@@ -41,13 +44,15 @@ public class ZombieEntity extends Entity {
 
         if(toChase == null) {
             if(attention <= 0) {
-                attention = 50;
-                directionX = random.nextInt(-1, 2);
-                directionY = random.nextInt(-1, 2);
+                attention = 50 + random.nextInt(0, 10);
+                generateRandomDirection();
+                if(random.nextBoolean()) {
+                    int offset = 300;
+                    int size = offset * 2;
+                    Rectangle area = new Rectangle((int) this.x - offset, (int) this.y - offset, size, size);
+                    world.searchAreaEntities(area, this);
+                }
             }
-            int offset = 300;
-            int size = offset * 2;
-            world.searchAreaEntities(new Rectangle((int) this.x - offset, (int) this.y - offset, size, size));
         } else {
             Vector2D pos = new Vector2D(x, y);
             Vector2D chasePos = toChase.getPos();
@@ -61,6 +66,7 @@ public class ZombieEntity extends Entity {
             attention--;
         } else {
             toChase = null;
+            generateRandomDirection();
         }
 
         this.x += speed * delta * directionX;
@@ -68,8 +74,20 @@ public class ZombieEntity extends Entity {
     }
 
     @Override
+    public void damage(int amount, Entity source) {
+        super.damage(amount, source);
+        attention = 100;
+        this.toChase = source;
+    }
+
+    @Override
     public void onDeath() {
         super.onDeath();
         world.detachSearchObserver(observer);
+    }
+
+    private void generateRandomDirection() {
+        directionX = random.nextInt(-1, 2);
+        directionY = random.nextInt(-1, 2);
     }
 }

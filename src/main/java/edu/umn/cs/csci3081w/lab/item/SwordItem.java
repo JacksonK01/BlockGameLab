@@ -8,11 +8,11 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Objects;
 
-public class Sword extends Item {
+public class SwordItem extends Item {
     private final BufferedImage sprite;
     private boolean toggleLeft = false;
 
-    public Sword(double x, double y) {
+    public SwordItem(double x, double y) {
         super(x, y, 64, 64, 1);
         try {
             sprite = ImageIO.read(Objects.requireNonNull(Item.class.getResourceAsStream("/textures/items/sword.png")));
@@ -21,7 +21,7 @@ public class Sword extends Item {
         }
     }
 
-    public Sword() {
+    public SwordItem() {
         this(0, 0);
     }
 
@@ -34,7 +34,7 @@ public class Sword extends Item {
             width = -width;
         }
         g2.drawImage(sprite, (int) x, (int) y, width, sprite.getHeight(), null);
-        g2.drawRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        //g2.drawRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
     }
 
     @Override

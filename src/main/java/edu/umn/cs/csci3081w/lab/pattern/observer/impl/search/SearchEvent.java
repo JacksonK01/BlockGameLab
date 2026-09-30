@@ -5,8 +5,10 @@ import edu.umn.cs.csci3081w.lab.pattern.observer.intr.Event;
 
 public class SearchEvent extends Event {
     public Entity found;
+    public Entity searcher;
 
-    public SearchEvent(Entity entity) {
-        this.found = entity;
+    public SearchEvent(Entity found, Entity searcher) {
+        this.found = found;
+        this.searcher = searcher;
     }
 }

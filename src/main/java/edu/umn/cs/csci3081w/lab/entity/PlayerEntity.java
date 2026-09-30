@@ -21,6 +21,10 @@ public class PlayerEntity extends Entity implements ItemHolder {
         super(world, Color.CYAN, World.TILE_SIZE, World.TILE_SIZE);
 
         observer = (e) -> {
+            if(e.searcher != this) {
+                return;
+            }
+
             Item item = itemBeingHeld();
             Entity entity = e.found;
             if(item == null || entity == this || !item.getBoundingBox().intersects(entity.getBoundingBox())) {
@@ -61,7 +65,7 @@ public class PlayerEntity extends Entity implements ItemHolder {
 
         Rectangle box = hand.getBoundingBox();
         hand.setPos(getPos());
-        world.searchAreaEntities(box);
+        world.searchAreaEntities(box, this);
     }
 
     @Override
