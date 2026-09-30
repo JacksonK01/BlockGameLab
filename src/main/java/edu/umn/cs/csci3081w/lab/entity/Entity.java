@@ -96,6 +96,11 @@ public abstract class Entity implements Tickable, Renderable, Detectable, Damage
     }
 
     @Override
+    public int getCooldown() {
+        return this.cooldown;
+    }
+
+    @Override
     public void onDeath() {
         world.getEntities().remove(this);
     }

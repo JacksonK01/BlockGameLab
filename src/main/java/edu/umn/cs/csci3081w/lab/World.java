@@ -98,13 +98,14 @@ public class World implements Tickable, Renderable {
                 return;
             }
 
+            int cooldown = player.getCooldown();
             player.damage(1, zombie);
             Item held = player.itemBeingHeld();
             if(held == null) {
                 return;
             }
 
-            if(held instanceof ItemDecorator itemDecorator) {
+            if(cooldown == 0 && held instanceof ItemDecorator itemDecorator) {
                 // Removes one booster level
                 player.placeItemInHand(itemDecorator.getItem());
                 // Implicitly booster amount will be > 0
