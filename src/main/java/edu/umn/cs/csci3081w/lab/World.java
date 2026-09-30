@@ -6,7 +6,7 @@ import edu.umn.cs.csci3081w.lab.entity.PlayerEntity;
 import edu.umn.cs.csci3081w.lab.input.KeyHandler;
 import edu.umn.cs.csci3081w.lab.intr.*;
 import edu.umn.cs.csci3081w.lab.item.Item;
-import edu.umn.cs.csci3081w.lab.spawner.DamageBoosterSpawner;
+import edu.umn.cs.csci3081w.lab.booster.DamageBoosterManager;
 import edu.umn.cs.csci3081w.lab.util.Vector2D;
 import edu.umn.cs.csci3081w.lab.pattern.factory.entity.BasicEntityFactory;
 import edu.umn.cs.csci3081w.lab.pattern.factory.entity.EntityFactory;
@@ -36,7 +36,7 @@ public class World implements Tickable, Renderable, Spawner {
     private final UIManager uiManager;
     private final CollisionManager collisionManager;
     private final WaveManager waveManager;
-    private final DamageBoosterSpawner damageBoosterSpawner;
+    private final DamageBoosterManager damageBoosterSpawner;
     private final EntityFactory entityFactory;
     private final ItemFactory itemFactory;
     private final WorldSearchSubject worldSearchSubject;
@@ -48,7 +48,7 @@ public class World implements Tickable, Renderable, Spawner {
         this.worldSearchSubject = new WorldSearchSubject();
         this.collisionManager = new CollisionManager(this);
         this.waveManager = new WaveManager(this);
-        this.damageBoosterSpawner = new DamageBoosterSpawner(this, waveManager.getStartOfWaveSubject(), collisionManager.getCollisionSubject());
+        this.damageBoosterSpawner = new DamageBoosterManager(this, waveManager.getStartOfWaveSubject(), collisionManager.getCollisionSubject());
         this.uiManager = new UIManager(this, waveManager.getStartOfWaveSubject(), damageBoosterSpawner.getDamageBoosterCollectedSubject());
     }
 

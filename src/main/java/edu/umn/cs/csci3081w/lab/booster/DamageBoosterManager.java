@@ -1,4 +1,4 @@
-package edu.umn.cs.csci3081w.lab.spawner;
+package edu.umn.cs.csci3081w.lab.booster;
 
 import edu.umn.cs.csci3081w.lab.World;
 import edu.umn.cs.csci3081w.lab.entity.Entity;
@@ -19,14 +19,14 @@ import edu.umn.cs.csci3081w.lab.util.Vector2D;
 import java.awt.*;
 import java.util.Random;
 
-public class DamageBoosterSpawner {
+public class DamageBoosterManager {
     private final static int MAX_BOOSTER = 5;
 
     private final DamageBoosterCollectedSubject subject;
     private int boosterAmount;
     private int boostersCollected;
 
-    public DamageBoosterSpawner(World world, Subject<WaveEvent> waveSubject, Subject<CollisionEvent> collisionSubject) {
+    public DamageBoosterManager(World world, Subject<WaveEvent> waveSubject, Subject<CollisionEvent> collisionSubject) {
         subject = new DamageBoosterCollectedSubject();
         boosterAmount = 0;
         boostersCollected = 0;
