@@ -1,7 +1,6 @@
 package edu.umn.cs.csci3081w.lab.spawner;
 
 import edu.umn.cs.csci3081w.lab.World;
-import edu.umn.cs.csci3081w.lab.collision.CollisionManager;
 import edu.umn.cs.csci3081w.lab.entity.Entity;
 import edu.umn.cs.csci3081w.lab.entity.PlayerEntity;
 import edu.umn.cs.csci3081w.lab.entity.ZombieEntity;
@@ -13,7 +12,6 @@ import edu.umn.cs.csci3081w.lab.pattern.observer.impl.booster.BoosterCollectedEv
 import edu.umn.cs.csci3081w.lab.pattern.observer.impl.booster.DamageBoosterCollectedSubject;
 import edu.umn.cs.csci3081w.lab.pattern.observer.impl.collision.CollisionEvent;
 import edu.umn.cs.csci3081w.lab.pattern.observer.impl.wave.WaveEvent;
-import edu.umn.cs.csci3081w.lab.pattern.observer.intr.Observer;
 import edu.umn.cs.csci3081w.lab.pattern.observer.intr.Subject;
 import edu.umn.cs.csci3081w.lab.util.SourceFinder;
 import edu.umn.cs.csci3081w.lab.util.Vector2D;
