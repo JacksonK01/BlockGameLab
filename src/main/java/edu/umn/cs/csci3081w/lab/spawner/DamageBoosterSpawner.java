@@ -5,17 +5,18 @@ import edu.umn.cs.csci3081w.lab.collision.CollisionManager;
 import edu.umn.cs.csci3081w.lab.entity.Entity;
 import edu.umn.cs.csci3081w.lab.entity.PlayerEntity;
 import edu.umn.cs.csci3081w.lab.entity.ZombieEntity;
-import edu.umn.cs.csci3081w.lab.intr.Tickable;
 import edu.umn.cs.csci3081w.lab.item.DamageBoosterItem;
 import edu.umn.cs.csci3081w.lab.item.Item;
 import edu.umn.cs.csci3081w.lab.pattern.decorator.ConcreteDamageBoosterDecorator;
 import edu.umn.cs.csci3081w.lab.pattern.decorator.ItemDecorator;
 import edu.umn.cs.csci3081w.lab.pattern.observer.impl.booster.BoosterCollectedEvent;
 import edu.umn.cs.csci3081w.lab.pattern.observer.impl.booster.DamageBoosterCollectedSubject;
+import edu.umn.cs.csci3081w.lab.pattern.observer.impl.collision.CollisionEvent;
+import edu.umn.cs.csci3081w.lab.pattern.observer.impl.wave.WaveEvent;
 import edu.umn.cs.csci3081w.lab.pattern.observer.intr.Observer;
+import edu.umn.cs.csci3081w.lab.pattern.observer.intr.Subject;
 import edu.umn.cs.csci3081w.lab.util.SourceFinder;
 import edu.umn.cs.csci3081w.lab.util.Vector2D;
-import edu.umn.cs.csci3081w.lab.wave.WaveManager;
 
 import java.awt.*;
 import java.util.Random;
@@ -23,16 +24,16 @@ import java.util.Random;
 public class DamageBoosterSpawner {
     private final static int MAX_BOOSTER = 5;
 
-    private DamageBoosterCollectedSubject subject;
+    private final DamageBoosterCollectedSubject subject;
     private int boosterAmount;
     private int boostersCollected;
 
-    public DamageBoosterSpawner(World world, WaveManager waveManager, CollisionManager collisionManager) {
+    public DamageBoosterSpawner(World world, Subject<WaveEvent> waveSubject, Subject<CollisionEvent> collisionSubject) {
         subject = new DamageBoosterCollectedSubject();
         boosterAmount = 0;
         boostersCollected = 0;
 
-        waveManager.attachOnRoundStart((e) -> {
+        waveSubject.attach((e) -> {
             Random random = new Random();
             Rectangle worldSize = world.getWorldSize();
             if(boostersCollected < MAX_BOOSTER && boosterAmount == boostersCollected) {
@@ -44,7 +45,7 @@ public class DamageBoosterSpawner {
             }
         });
 
-        collisionManager.attachOnCollision((e) -> {
+        collisionSubject.attach((e) -> {
             PlayerEntity player = SourceFinder.findSource(e.a, e.b, PlayerEntity.class);
             ZombieEntity zombie = SourceFinder.findSource(e.a, e.b, ZombieEntity.class);
 
@@ -70,7 +71,7 @@ public class DamageBoosterSpawner {
             }
         });
 
-        collisionManager.attachOnCollision((e) -> {
+        collisionSubject.attach((e) -> {
             PlayerEntity player = SourceFinder.findSource(e.a, e.b, PlayerEntity.class);
             DamageBoosterItem booster = SourceFinder.findSource(e.a, e.b, DamageBoosterItem.class);
 
@@ -91,11 +92,7 @@ public class DamageBoosterSpawner {
         });
     }
 
-    public void attachOnCollected(Observer<BoosterCollectedEvent> o) {
-        this.subject.attach(o);
-    }
-
-    public void detachOnCollected(Observer<BoosterCollectedEvent> o) {
-        this.subject.detach(o);
+    public Subject<BoosterCollectedEvent> getDamageBoosterCollectedSubject() {
+        return this.subject;
     }
 }

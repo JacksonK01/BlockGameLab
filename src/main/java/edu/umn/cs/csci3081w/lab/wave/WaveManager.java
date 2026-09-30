@@ -8,6 +8,7 @@ import edu.umn.cs.csci3081w.lab.intr.WaveSpawnerStrategy;
 import edu.umn.cs.csci3081w.lab.pattern.observer.impl.wave.StartOfWaveSubject;
 import edu.umn.cs.csci3081w.lab.pattern.observer.impl.wave.WaveEvent;
 import edu.umn.cs.csci3081w.lab.pattern.observer.intr.Observer;
+import edu.umn.cs.csci3081w.lab.pattern.observer.intr.Subject;
 
 import java.util.List;
 
@@ -53,11 +54,7 @@ public class WaveManager implements Tickable {
         }
     }
 
-    public void attachOnRoundStart(Observer<WaveEvent> o) {
-        this.startOfWaveSubject.attach(o);
-    }
-
-    public void detachOnRoundStart(Observer<WaveEvent> o) {
-        this.startOfWaveSubject.detach(o);
+    public Subject<WaveEvent> getStartOfWaveSubject() {
+        return this.startOfWaveSubject;
     }
 }

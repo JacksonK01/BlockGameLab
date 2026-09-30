@@ -48,8 +48,8 @@ public class World implements Tickable, Renderable, Spawner {
         this.worldSearchSubject = new WorldSearchSubject();
         this.collisionManager = new CollisionManager(this);
         this.waveManager = new WaveManager(this);
-        this.damageBoosterSpawner = new DamageBoosterSpawner(this, waveManager, collisionManager);
-        this.uiManager = new UIManager(this, waveManager, damageBoosterSpawner);
+        this.damageBoosterSpawner = new DamageBoosterSpawner(this, waveManager.getStartOfWaveSubject(), collisionManager.getCollisionSubject());
+        this.uiManager = new UIManager(this, waveManager.getStartOfWaveSubject(), damageBoosterSpawner.getDamageBoosterCollectedSubject());
     }
 
     //Runs right before the game loop starts

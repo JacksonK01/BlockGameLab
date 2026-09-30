@@ -10,6 +10,7 @@ import edu.umn.cs.csci3081w.lab.intr.Tickable;
 import edu.umn.cs.csci3081w.lab.item.DamageBoosterItem;
 import edu.umn.cs.csci3081w.lab.item.Item;
 import edu.umn.cs.csci3081w.lab.item.SwordItem;
+import edu.umn.cs.csci3081w.lab.pattern.observer.intr.Subject;
 import edu.umn.cs.csci3081w.lab.util.SourceFinder;
 import edu.umn.cs.csci3081w.lab.util.Vector2D;
 import edu.umn.cs.csci3081w.lab.pattern.decorator.ConcreteDamageBoosterDecorator;
@@ -107,11 +108,7 @@ public class CollisionManager implements Tickable {
         }
     }
 
-    public void attachOnCollision(Observer<CollisionEvent> o) {
-        this.collisionSubject.attach(o);
-    }
-
-    public void detachOnCollision(Observer<CollisionEvent> o) {
-        this.collisionSubject.detach(o);
+    public Subject<CollisionEvent> getCollisionSubject() {
+        return this.collisionSubject;
     }
 }

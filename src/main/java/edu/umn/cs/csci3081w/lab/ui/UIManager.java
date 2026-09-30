@@ -2,8 +2,9 @@ package edu.umn.cs.csci3081w.lab.ui;
 
 import edu.umn.cs.csci3081w.lab.World;
 import edu.umn.cs.csci3081w.lab.intr.Renderable;
-import edu.umn.cs.csci3081w.lab.spawner.DamageBoosterSpawner;
-import edu.umn.cs.csci3081w.lab.wave.WaveManager;
+import edu.umn.cs.csci3081w.lab.pattern.observer.impl.booster.BoosterCollectedEvent;
+import edu.umn.cs.csci3081w.lab.pattern.observer.impl.wave.WaveEvent;
+import edu.umn.cs.csci3081w.lab.pattern.observer.intr.Subject;
 
 import java.awt.*;
 
@@ -15,16 +16,16 @@ public class UIManager implements Renderable {
     private int currentWave;
     private int boostCollected;
 
-    public UIManager(World world, WaveManager waveManager, DamageBoosterSpawner damageBoosterSpawner) {
+    public UIManager(World world, Subject<WaveEvent> waveSubject, Subject<BoosterCollectedEvent> collisionSubject) {
         this.world = world;
         this.currentWave = 0;
         this.boostCollected = 0;
 
-        waveManager.attachOnRoundStart((e) -> {
+        waveSubject.attach((e) -> {
             currentWave = e.wave;
         });
 
-        damageBoosterSpawner.attachOnCollected((e) -> {
+        collisionSubject.attach((e) -> {
             boostCollected = e.collected;
         });
     }
