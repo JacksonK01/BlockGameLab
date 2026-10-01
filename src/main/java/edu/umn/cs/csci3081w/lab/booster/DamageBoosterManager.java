@@ -43,6 +43,28 @@ public class DamageBoosterManager {
             }
         });
 
+        // On collide with damage booster item
+        collisionSubject.attach((e) -> {
+            PlayerEntity player = SourceFinder.findSource(e.a, e.b, PlayerEntity.class);
+            DamageBoosterItem booster = SourceFinder.findSource(e.a, e.b, DamageBoosterItem.class);
+
+            if(player == null || booster == null) {
+                return;
+            }
+
+            Item hand = player.itemBeingHeld();
+            if(hand == null) {
+                return;
+            }
+
+            player.placeItemInHand(new ConcreteDamageBoosterDecorator(hand));
+            world.getItems().remove(booster);
+            boostersCollected++;
+            subject.setCollected(boostersCollected);
+            subject.notifyObservers();
+        });
+
+        // On hit by zombie
         collisionSubject.attach((e) -> {
             PlayerEntity player = SourceFinder.findSource(e.a, e.b, PlayerEntity.class);
             ZombieEntity zombie = SourceFinder.findSource(e.a, e.b, ZombieEntity.class);
@@ -67,26 +89,6 @@ public class DamageBoosterManager {
                 subject.setCollected(boostersCollected);
                 subject.notifyObservers();
             }
-        });
-
-        collisionSubject.attach((e) -> {
-            PlayerEntity player = SourceFinder.findSource(e.a, e.b, PlayerEntity.class);
-            DamageBoosterItem booster = SourceFinder.findSource(e.a, e.b, DamageBoosterItem.class);
-
-            if(player == null || booster == null) {
-                return;
-            }
-
-            Item hand = player.itemBeingHeld();
-            if(hand == null) {
-                return;
-            }
-
-            player.placeItemInHand(new ConcreteDamageBoosterDecorator(hand));
-            world.getItems().remove(booster);
-            boostersCollected++;
-            subject.setCollected(boostersCollected);
-            subject.notifyObservers();
         });
     }
 
