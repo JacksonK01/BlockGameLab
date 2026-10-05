@@ -12,6 +12,8 @@ import edu.umn.cs.csci3081w.lab.pattern.observer.intr.Subject;
 import java.util.List;
 
 public class WaveManager implements Tickable {
+    private static final int TIME_BEFORE_WAVE = 100;
+
     private final World world;
     private WaveSpawnerStrategy waveSpawnerStrategy;
     private StartOfWaveSubject startOfWaveSubject;
@@ -23,7 +25,7 @@ public class WaveManager implements Tickable {
         this.world = world;
         this.waveSpawnerStrategy = new ZombieWaveStrategy();
         this.startOfWaveSubject = new StartOfWaveSubject();
-        this.timeUntilNextRound = 100;
+        this.timeUntilNextRound = TIME_BEFORE_WAVE;
         this.readyForNextWave = true;
         this.wave = 0;
     }
@@ -36,7 +38,7 @@ public class WaveManager implements Tickable {
             if(readyForNextWave) {
                 wave++;
                 readyForNextWave = false;
-                timeUntilNextRound = 100;
+                timeUntilNextRound = TIME_BEFORE_WAVE;
                 waveSpawnerStrategy.spawnWave(world, world.getWorldSize(), wave);
 
                 startOfWaveSubject.setWave(wave);
